@@ -1,0 +1,25 @@
+# Render blueprint — servicio FastAPI (free tier) + Neon Postgres (free, no expira).
+# Deploy: Render Dashboard → New → Blueprint → connect Vexinter-AI/vexinter.
+# The repo's only branch is `public-release`, which is what gets built.
+#
+# Postgres: crear DB gratis en neon.tech → copiar la connection string
+# (incluye sslmode) y pegarla como VEXINTER_PG_DSN en el dashboard de Render.
+services:
+  - type: web
+    name: vexinter
+    runtime: docker
+    plan: free
+    branch: public-release
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: VEXINTER_PG_DSN
+        sync: false # pegar manualmente: connection string de Neon
+      - key: VEXINTER_AUTO_MIGRATE
+        value: "1"
+      - key: VEXINTER_COOKIE_SECURE
+        value: "1"
+      - key: VEXINTER_ADMIN_TOKEN
+        generateValue: true
+      - key: VEXINTER_METRICS_TOKEN
+        generateValue: true
