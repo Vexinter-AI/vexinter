@@ -1,0 +1,15 @@
+Vexinter Pro — Proprietary License Notice
+=========================================
+
+Copyright (c) 2026 Vexinter Contributors
+
+This package is part of the commercial offering of Vexinter and is
+distributed only to active subscribers under the Vexinter Terms of
+Service (https://vexinter.com/terms).
+
+You may install and use this package solely to operate a Vexinter
+deployment covered by an active paid subscription. Redistribution,
+resale or use beyond the subscribed scope is prohibited.
+
+The package contains no license-signing capability: license documents
+are issued exclusively by the Vexinter commercial backend.

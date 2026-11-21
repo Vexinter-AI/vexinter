@@ -1,0 +1,60 @@
+name: Publicar SDK TypeScript en npm
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Versión a publicar (debe coincidir con package.json)"
+        required: true
+
+permissions:
+  contents: read
+  id-token: write # requerido para npm provenance
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+      - run: npm ci
+        working-directory: packages/sdk-ts
+      - run: npm run build
+        working-directory: packages/sdk-ts
+      - run: npm test
+        working-directory: packages/sdk-ts
+      - name: Verificar credencial npm
+        working-directory: packages/sdk-ts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::NPM_TOKEN secret is empty or not set"
+            exit 1
+          fi
+          echo "NPM_TOKEN present (${#NODE_AUTH_TOKEN} chars)"
+          npm whoami || echo "::warning::token present but npm whoami failed (expired/revoked?)"
+
+      - name: Publicar en npm
+        working-directory: packages/sdk-ts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VERSION_INPUT: ${{ inputs.version }}
+        run: |
+          if [ -n "$VERSION_INPUT" ]; then
+            node -e "
+              const fs = require('fs');
+              const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+              const want = process.env.VERSION_INPUT.replace(/^v/, '');
+              if (p.version !== want) {
+                console.error('package.json version ' + p.version + ' != ' + want);
+                process.exit(1);
+              }
+            "
+          fi
+          npm publish --provenance --access public
