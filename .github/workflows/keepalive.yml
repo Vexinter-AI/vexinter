@@ -1,0 +1,19 @@
+name: Keepalive
+
+# Render free tier spins down after ~15 min without traffic. This pings
+# /health every 10 minutes so the service stays warm. Update the URL
+# below if the Render service URL changes.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping health endpoint
+        run: |
+          curl -fsS --max-time 90 \
+            https://api.vexinter.com/health \
+            || echo "health check failed (service may be cold-starting)"
